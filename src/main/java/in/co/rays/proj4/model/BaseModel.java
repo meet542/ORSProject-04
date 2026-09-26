@@ -3,6 +3,8 @@ package in.co.rays.proj4.model;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import in.co.rays.proj4.bean.BaseBean;
 import in.co.rays.proj4.exception.ApplicationException;
@@ -19,10 +21,12 @@ public abstract class BaseModel<T extends BaseBean> {
 
 	public abstract T getBean();
 
-	public int nextPk() {
+	public abstract String getWhereClause(T bean);
+
+	public long nextPk() {
 
 		Connection conn = null;
-		int pk = 0;
+		long pk = 0;
 
 		try {
 
@@ -35,6 +39,7 @@ public abstract class BaseModel<T extends BaseBean> {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			JDBCDataSource.trnRollBack(conn);
 		} finally {
 			JDBCDataSource.closeConnection(conn);
 		}
@@ -43,7 +48,7 @@ public abstract class BaseModel<T extends BaseBean> {
 
 	}
 
-	public void delete(long id){
+	public void delete(long id) {
 
 		Connection conn = null;
 
@@ -64,6 +69,105 @@ public abstract class BaseModel<T extends BaseBean> {
 		} finally {
 			JDBCDataSource.closeConnection(conn);
 		}
+	}
+
+	public T findByPk(long pk) {
+
+		T bean = null;
+		Connection conn = null;
+
+		try {
+
+			conn = JDBCDataSource.getConnection();
+			PreparedStatement prestmt = conn.prepareStatement("select * from " + getTable() + " where id = ?");
+			prestmt.setLong(1, pk);
+
+			ResultSet rs = prestmt.executeQuery();
+
+			while (rs.next()) {
+				bean = getBean();
+				bean.setResultSet(rs);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			JDBCDataSource.trnRollBack(conn);
+		} finally {
+			JDBCDataSource.closeConnection(conn);
+		}
+
+		return bean;
+
+	}
+
+	public List<T> search(T bean, int pageNo, int pageSize) {
+
+		List<T> list = new ArrayList<T>();
+		Connection conn = null;
+		StringBuffer sql = new StringBuffer("select * from " + getTable() + " where 1=1");// sql injection
+
+		sql.append(getWhereClause(bean));
+
+		if (pageSize > 0) {
+			pageNo = (pageNo - 1) * pageSize;
+			sql.append(" limit " + pageNo + ", " + pageSize);
+		}
+
+		System.out.println("sql =======>>>>> " + sql.toString());
+
+		try {
+
+			conn = JDBCDataSource.getConnection();
+			PreparedStatement prestmt = conn.prepareStatement(sql.toString());
+
+			ResultSet rs = prestmt.executeQuery();
+
+			while (rs.next()) {
+				bean = getBean();
+				bean.setResultSet(rs);
+				list.add(bean);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			JDBCDataSource.trnRollBack(conn);
+		} finally {
+			JDBCDataSource.closeConnection(conn);
+		}
+
+		return list;
+
+	}
+
+	public T findByUniqueColumn(String column, String value) {
+
+		T bean = null;
+		Connection conn = null;
+
+		try {
+
+			conn = JDBCDataSource.getConnection();
+			PreparedStatement prestmt = conn
+					.prepareStatement("select * from " + getTable() + " where " + column + " = ?");
+
+			prestmt.setString(1, value);
+
+			ResultSet rs = prestmt.executeQuery();
+
+			while (rs.next()) {
+				bean = getBean();
+				bean.setResultSet(rs);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			JDBCDataSource.trnRollBack(conn);
+		} finally {
+			JDBCDataSource.closeConnection(conn);
+		}
+
+		return bean;
+
 	}
 
 }

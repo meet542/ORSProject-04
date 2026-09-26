@@ -19,7 +19,8 @@ public class TestRoleModel {
 
 //		testAdd();
 //		testUpdate();
-		testDelete();
+//		testDelete();
+		testFindByPk();
 
 	}
 
@@ -54,6 +55,22 @@ public class TestRoleModel {
 	private static void testDelete() {
 		
 		model.delete(6);
+		
+	}
+	
+	private static void testFindByPk() {
+		
+		RoleBean bean = new RoleBean();
+		
+		bean = model.findByPk(4);
+		
+		System.out.println("name : " + bean.getName());
+		System.out.println("description : " + bean.getDescription());
+		System.out.println("created by : " + bean.getCreatedBy());
+		System.out.println("modified by : " + bean.getModifiedBy());
+		System.out.println("created date time : " + bean.getCreatedDatetime());
+		System.out.println("modified date time : " + bean.getModifiedDatetime());
+		
 		
 	}
 

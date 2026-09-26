@@ -14,8 +14,14 @@ public class RoleModel extends BaseModel<RoleBean> {
 	@Override
 	public long add(RoleBean bean) throws ApplicationException, DuplicateRecordException {
 
+		RoleBean existBean = findByName(bean.getName());
+
+		if (existBean != null) {
+			throw new DuplicateRecordException("role name already exist");
+		}
+
 		Connection conn = null;
-		int pk = nextPk();
+		long pk = nextPk();
 
 		try {
 
@@ -47,6 +53,12 @@ public class RoleModel extends BaseModel<RoleBean> {
 	@Override
 	public void update(RoleBean bean) throws ApplicationException, DuplicateRecordException {
 
+		RoleBean existBean = findByName(bean.getName());
+
+		if (existBean != null && existBean.getId() != bean.getId()) {
+			throw new DuplicateRecordException("role name already exist");
+		}
+
 		Connection conn = null;
 
 		try {
@@ -54,7 +66,7 @@ public class RoleModel extends BaseModel<RoleBean> {
 			conn = JDBCDataSource.getConnection();
 			conn.setAutoCommit(false);
 			PreparedStatement prestmt = conn.prepareStatement(
-					"update st_role set name = ?, description = ?, modified_by = ?, modified_datetime = ? where id = ?");
+					"update " + getTable() + " set name = ?, description = ?, modified_by = ?, modified_datetime = ? where id = ?");
 
 			prestmt.setString(1, bean.getName());
 			prestmt.setString(2, bean.getDescription());
@@ -74,6 +86,13 @@ public class RoleModel extends BaseModel<RoleBean> {
 
 	}
 
+	public RoleBean findByName(String name) {
+
+		RoleBean bean = findByUniqueColumn("name", name);
+
+		return bean;
+	}
+
 	@Override
 	public String getTable() {
 		return "st_role";
@@ -82,6 +101,23 @@ public class RoleModel extends BaseModel<RoleBean> {
 	@Override
 	public RoleBean getBean() {
 		return new RoleBean();
+	}
+
+	@Override
+	public String getWhereClause(RoleBean bean) {
+
+		StringBuffer sql = new StringBuffer("");
+
+		if (bean != null) {
+			if (bean.getId() > 0) {
+				sql.append(" and id = " + bean.getId());
+			}
+			if (bean.getName() != null && bean.getName().length() > 0) {
+				sql.append(" and name like  '" + bean.getName() + "%'");
+			}
+		}
+
+		return sql.toString();
 	}
 
 }
