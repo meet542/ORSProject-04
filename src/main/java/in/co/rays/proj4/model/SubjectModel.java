@@ -2,21 +2,22 @@ package in.co.rays.proj4.model;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
-import in.co.rays.proj4.bean.CourseBean;
+import in.co.rays.proj4.bean.SubjectBean;
 import in.co.rays.proj4.exception.ApplicationException;
 import in.co.rays.proj4.exception.DuplicateRecordException;
 import in.co.rays.proj4.util.JDBCDataSource;
 
-public class CourseModel extends BaseModel<CourseBean> {
+public class SubjectModel extends BaseModel<SubjectBean> {
 
 	@Override
-	public long add(CourseBean bean) throws ApplicationException, DuplicateRecordException {
+	public long add(SubjectBean bean) throws ApplicationException, DuplicateRecordException {
 
-		CourseBean existBean = findByName(bean.getName());
+		SubjectBean existBean = findByName(bean.getName());
 
-		if (existBean != null) {
-			throw new DuplicateRecordException("course name already exist.");
+		if (existBean != null && existBean.getId() != bean.getId()) {
+			throw new DuplicateRecordException("role name already exist");
 		}
 
 		Connection conn = null;
@@ -31,7 +32,7 @@ public class CourseModel extends BaseModel<CourseBean> {
 			prestmt.setLong(1, pk);
 			prestmt.setString(2, bean.getName());
 			prestmt.setString(3, bean.getDescription());
-			prestmt.setString(4, bean.getDuration());
+			prestmt.setLong(4, bean.getCourseId());
 			prestmt.setString(5, bean.getCreatedBy());
 			prestmt.setString(6, bean.getModifiedBy());
 			prestmt.setTimestamp(7, bean.getCreatedDatetime());
@@ -41,24 +42,22 @@ public class CourseModel extends BaseModel<CourseBean> {
 			conn.commit();
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-			JDBCDataSource.closeConnection(conn);
+			JDBCDataSource.trnRollBack(conn);
 		} finally {
 			JDBCDataSource.closeConnection(conn);
-
 		}
 
 		return pk;
 	}
 
 	@Override
-	public void update(CourseBean bean) throws ApplicationException, DuplicateRecordException {
+	public void update(SubjectBean bean) throws ApplicationException, DuplicateRecordException {
 
-		CourseBean existBean = findByName(bean.getName());
+		SubjectBean existBean = findByName(bean.getName());
 
-		if (existBean != null) {
-			throw new DuplicateRecordException("course name already exist.");
+		if (existBean != null && existBean.getId() != bean.getId()) {
+			throw new DuplicateRecordException("role name already exist");
 		}
 
 		Connection conn = null;
@@ -68,11 +67,11 @@ public class CourseModel extends BaseModel<CourseBean> {
 			conn = JDBCDataSource.getConnection();
 			conn.setAutoCommit(false);
 			PreparedStatement prestmt = conn.prepareStatement("update " + getTable()
-					+ " set name = ?, description = ?, duration = ?, modified_by = ?, modified_datetime = ? where id = ?");
+					+ " set name = ?, description = ?, course_id = ?, modified_by = ?, modified_datetime = ? where id = ?");
 
 			prestmt.setString(1, bean.getName());
 			prestmt.setString(2, bean.getDescription());
-			prestmt.setString(3, bean.getDuration());
+			prestmt.setLong(3, bean.getCourseId());
 			prestmt.setString(4, bean.getModifiedBy());
 			prestmt.setTimestamp(5, bean.getModifiedDatetime());
 			prestmt.setLong(6, bean.getId());
@@ -80,36 +79,36 @@ public class CourseModel extends BaseModel<CourseBean> {
 			prestmt.executeUpdate();
 			conn.commit();
 
-		} catch (Exception e) {
-
+		} catch (SQLException e) {
 			e.printStackTrace();
-			JDBCDataSource.closeConnection(conn);
+			JDBCDataSource.trnRollBack(conn);
 		} finally {
 			JDBCDataSource.closeConnection(conn);
 		}
 
 	}
 
-	public CourseBean findByName(String name) {
+	public SubjectBean findByName(String name) {
 
-		CourseBean bean = findByUniqueColumn("name", name);
+		SubjectBean bean = findByUniqueColumn("name", name);
+
 		return bean;
 	}
 
 	@Override
 	public String getTable() {
 
-		return "st_course";
+		return "st_subject";
 	}
 
 	@Override
-	public CourseBean getBean() {
+	public SubjectBean getBean() {
 
-		return new CourseBean();
+		return new SubjectBean();
 	}
 
 	@Override
-	public String getWhereClause(CourseBean bean) {
+	public String getWhereClause(SubjectBean bean) {
 		// TODO Auto-generated method stub
 		return null;
 	}
