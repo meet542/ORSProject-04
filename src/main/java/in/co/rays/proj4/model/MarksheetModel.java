@@ -59,8 +59,8 @@ public class MarksheetModel extends BaseModel<MarksheetBean> {
 
 		MarksheetBean existBean = findByName(bean.getName());
 
-		if (existBean != null) {
-			throw new DuplicateRecordException("name already exist");
+		if (existBean != null && existBean.getId() != bean.getId()) {
+			throw new DuplicateRecordException("role name already exist");
 		}
 
 		Connection conn = null;
@@ -102,6 +102,37 @@ public class MarksheetModel extends BaseModel<MarksheetBean> {
 	}
 
 	@Override
+	public String getWhereClause(MarksheetBean bean) {
+
+		StringBuffer sql = new StringBuffer();
+
+		if (bean != null) {
+			System.out.println("service" + bean.getName());
+			if (bean.getId() > 0) {
+				sql.append(" AND id = " + bean.getId());
+			}
+			if (bean.getRollNo() != null && bean.getRollNo().length() > 0) {
+				sql.append(" AND roll_no like '" + bean.getRollNo() + "%'");
+			}
+			if (bean.getName() != null && bean.getName().length() > 0) {
+				sql.append(" AND name like '" + bean.getName() + "%'");
+			}
+			if (bean.getPhysics() != null && bean.getPhysics() > 0) {
+				sql.append(" AND physics = " + bean.getPhysics());
+			}
+			if (bean.getChemistry() != null && bean.getChemistry() > 0) {
+				sql.append(" AND chemistry = " + bean.getChemistry());
+			}
+			if (bean.getMaths() != null && bean.getMaths() > 0) {
+				sql.append(" AND maths = '" + bean.getMaths());
+			}
+
+		}
+		return sql.toString();
+
+	}
+
+	@Override
 	public String getTable() {
 
 		return "st_marksheet";
@@ -111,12 +142,6 @@ public class MarksheetModel extends BaseModel<MarksheetBean> {
 	public MarksheetBean getBean() {
 
 		return new MarksheetBean();
-	}
-
-	@Override
-	public String getWhereClause(MarksheetBean bean) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

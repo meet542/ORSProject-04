@@ -15,7 +15,7 @@ public class StudentModel extends BaseModel<StudentBean> {
 	public long add(StudentBean bean) throws ApplicationException, DuplicateRecordException {
 
 		StudentBean existBean = findByMobileNo(bean.getMobileNo());
-		
+
 		if (existBean != null) {
 			throw new DuplicateRecordException("student mobile number already exist");
 		}
@@ -63,7 +63,7 @@ public class StudentModel extends BaseModel<StudentBean> {
 
 	@Override
 	public void update(StudentBean bean) throws ApplicationException, DuplicateRecordException {
-		
+
 		StudentBean existBean = findByMobileNo(bean.getMobileNo());
 
 		if (existBean != null && existBean.getId() != bean.getId()) {
@@ -112,6 +112,39 @@ public class StudentModel extends BaseModel<StudentBean> {
 		return bean;
 	}
 
+	@SuppressWarnings("deprecation")
+	@Override
+	public String getWhereClause(StudentBean bean) {
+		
+		StringBuffer sql = new StringBuffer();
+		
+		if (bean != null) {
+			if (bean.getId() > 0) {
+				sql.append(" AND id = " + bean.getId());
+			}
+			if (bean.getFirstName() != null && bean.getFirstName().length() > 0) {
+				sql.append(" AND FIRST_NAME like '" + bean.getFirstName() + "%'");
+			}
+			if (bean.getLastName() != null && bean.getLastName().length() > 0) {
+				sql.append(" AND LAST_NAME like '" + bean.getLastName() + "%'");
+			}
+			if (bean.getDob() != null && bean.getDob().getDate() > 0) {
+				sql.append(" AND DOB = " + bean.getDob());
+			}
+			if (bean.getMobileNo() != null && bean.getMobileNo().length() > 0) {
+				sql.append(" AND MOBILE_NO like '" + bean.getMobileNo() + "%'");
+			}
+			if (bean.getEmail() != null && bean.getEmail().length() > 0) {
+				sql.append(" AND EMAIL like '" + bean.getEmail() + "%'");
+			}
+			if (bean.getCollegeName() != null && bean.getCollegeName().length() > 0) {
+				sql.append(" AND COLLEGE_NAME = " + bean.getCollegeName());
+			}
+		}
+
+		return sql.toString();
+	}
+
 	@Override
 	public String getTable() {
 
@@ -122,12 +155,6 @@ public class StudentModel extends BaseModel<StudentBean> {
 	public StudentBean getBean() {
 
 		return new StudentBean();
-	}
-
-	@Override
-	public String getWhereClause(StudentBean bean) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

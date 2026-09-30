@@ -57,8 +57,8 @@ public class CourseModel extends BaseModel<CourseBean> {
 
 		CourseBean existBean = findByName(bean.getName());
 
-		if (existBean != null) {
-			throw new DuplicateRecordException("course name already exist.");
+		if (existBean != null && existBean.getId() != bean.getId()) {
+			throw new DuplicateRecordException("course name already exist");
 		}
 
 		Connection conn = null;
@@ -95,6 +95,29 @@ public class CourseModel extends BaseModel<CourseBean> {
 		CourseBean bean = findByUniqueColumn("name", name);
 		return bean;
 	}
+	
+	@Override
+	public String getWhereClause(CourseBean bean) {
+		StringBuffer sql = new StringBuffer();
+
+		if (bean != null) {
+			if (bean.getId() > 0) {
+				sql.append(" AND id = " + bean.getId());
+			}
+			if (bean.getName() != null && bean.getName().length() > 0) {
+				sql.append(" AND NAME like '" + bean.getName() + "%'");
+			}
+			if (bean.getDescription() != null && bean.getDescription().length() > 0) {
+				sql.append(" AND DESCRIPTION like '" + bean.getDescription() + "%'");
+			}
+			if (bean.getDuration() != null && bean.getDuration().length() > 0) {
+				sql.append(" AND DURATION like '" + bean.getDuration() + "%'");
+			}
+
+		}
+
+		return sql.toString();
+	}
 
 	@Override
 	public String getTable() {
@@ -108,10 +131,5 @@ public class CourseModel extends BaseModel<CourseBean> {
 		return new CourseBean();
 	}
 
-	@Override
-	public String getWhereClause(CourseBean bean) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }

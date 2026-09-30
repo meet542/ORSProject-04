@@ -12,11 +12,11 @@ public class UserModel extends BaseModel<UserBean> {
 
 	@Override
 	public long add(UserBean bean) throws ApplicationException, DuplicateRecordException {
-		
+
 		UserBean existBean = findByLogin(bean.getLogin());
 
 		if (existBean != null) {
-			throw new DuplicateRecordException("login already exist");
+			throw new DuplicateRecordException("login email already exist");
 		}
 
 		Connection conn = null;
@@ -119,6 +119,58 @@ public class UserModel extends BaseModel<UserBean> {
 		return bean;
 	}
 
+	@SuppressWarnings("deprecation")
+	@Override
+	public String getWhereClause(UserBean bean) {
+
+		StringBuffer sql = new StringBuffer();
+
+		if (bean != null) {
+			if (bean.getId() > 0) {
+				sql.append(" AND id = " + bean.getId());
+			}
+			if (bean.getFirstName() != null && bean.getFirstName().length() > 0) {
+				sql.append(" and first_name like '" + bean.getFirstName() + "%'");
+			}
+			if (bean.getLastName() != null && bean.getLastName().length() > 0) {
+				sql.append(" and last_name like '%" + bean.getLastName() + "%'");
+			}
+			if (bean.getLogin() != null && bean.getLogin().length() > 0) {
+				sql.append(" and login like '" + bean.getLogin() + "%'");
+			}
+			if (bean.getPassword() != null && bean.getPassword().length() > 0) {
+				sql.append(" and password like '" + bean.getPassword() + "%'");
+			}
+			if (bean.getDob() != null && bean.getDob().getDate() > 0) {
+				sql.append(" and dob = " + bean.getGender());
+			}
+			if (bean.getMobileNo() != null && bean.getMobileNo().length() > 0) {
+				sql.append(" and mobile_no = " + bean.getMobileNo());
+			}
+			if (bean.getRoleId() > 0) {
+				sql.append(" and role_id = " + bean.getRoleId());
+			}
+			if (bean.getUnsuccessfulLogin() > 0) {
+				sql.append(" and unsuccessful_login = " + bean.getUnsuccessfulLogin());
+			}
+			if (bean.getGender() != null && bean.getGender().length() > 0) {
+				sql.append(" and gender like '" + bean.getGender() + "%'");
+			}
+			if (bean.getLastLogin() != null && bean.getLastLogin().getTime() > 0) {
+				sql.append(" and last_login = " + bean.getLastLogin());
+			}
+			if (bean.getRegisteredIp() != null && bean.getRegisteredIp().length() > 0) {
+				sql.append(" and registered_ip like '" + bean.getRegisteredIp() + "%'");
+			}
+			if (bean.getLastLoginIp() != null && bean.getLastLoginIp().length() > 0) {
+				sql.append(" and last_login_ip like '" + bean.getLastLoginIp() + "%'");
+			}
+
+		}
+
+		return sql.toString();
+	}
+
 	@Override
 	public String getTable() {
 
@@ -129,14 +181,6 @@ public class UserModel extends BaseModel<UserBean> {
 	public UserBean getBean() {
 
 		return new UserBean();
-	}
-
-	@Override
-	public String getWhereClause(UserBean bean) {
-
-//		StringBuffer sql = new StringBuffer("");
-
-		return null;
 	}
 
 }

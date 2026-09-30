@@ -17,9 +17,9 @@ public class TestRoleModel {
 
 	public static void main(String[] args) {
 
-//		testAdd();
-//		testUpdate();
-//		testDelete();
+		testAdd();
+		testUpdate();
+		testDelete();
 		testFindByPk();
 
 	}

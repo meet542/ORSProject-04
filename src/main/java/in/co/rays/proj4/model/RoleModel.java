@@ -65,8 +65,8 @@ public class RoleModel extends BaseModel<RoleBean> {
 
 			conn = JDBCDataSource.getConnection();
 			conn.setAutoCommit(false);
-			PreparedStatement prestmt = conn.prepareStatement(
-					"update " + getTable() + " set name = ?, description = ?, modified_by = ?, modified_datetime = ? where id = ?");
+			PreparedStatement prestmt = conn.prepareStatement("update " + getTable()
+					+ " set name = ?, description = ?, modified_by = ?, modified_datetime = ? where id = ?");
 
 			prestmt.setString(1, bean.getName());
 			prestmt.setString(2, bean.getDescription());
@@ -114,6 +114,9 @@ public class RoleModel extends BaseModel<RoleBean> {
 			}
 			if (bean.getName() != null && bean.getName().length() > 0) {
 				sql.append(" and name like  '" + bean.getName() + "%'");
+			}
+			if (bean.getDescription() != null && bean.getDescription().length() > 0) {
+				sql.append(" and description like '" + bean.getDescription() + "%'");
 			}
 		}
 

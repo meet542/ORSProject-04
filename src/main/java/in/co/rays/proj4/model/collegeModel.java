@@ -58,8 +58,8 @@ public class CollegeModel extends BaseModel<CollegeBean> {
 
 		CollegeBean existBean = findByName(bean.getName());
 
-		if (existBean != null) {
-			throw new DuplicateRecordException("course name already exist.");
+		if (existBean != null && existBean.getId() != bean.getId()) {
+			throw new DuplicateRecordException("college name already exist");
 		}
 
 		Connection conn = null;
@@ -100,6 +100,34 @@ public class CollegeModel extends BaseModel<CollegeBean> {
 	}
 
 	@Override
+	public String getWhereClause(CollegeBean bean) {
+		StringBuffer sql = new StringBuffer();
+
+		if (bean != null) {
+			if (bean.getId() > 0) {
+				sql.append(" AND id = " + bean.getId());
+			}
+			if (bean.getName() != null && bean.getName().length() > 0) {
+				sql.append(" AND NAME like '" + bean.getName() + "%'");
+			}
+			if (bean.getAddress() != null && bean.getAddress().length() > 0) {
+				sql.append(" AND ADDRESS like '" + bean.getAddress() + "%'");
+			}
+			if (bean.getState() != null && bean.getState().length() > 0) {
+				sql.append(" AND STATE like '" + bean.getState() + "%'");
+			}
+			if (bean.getCity() != null && bean.getCity().length() > 0) {
+				sql.append(" AND CITY like '" + bean.getCity() + "%'");
+			}
+			if (bean.getPhoneNo() != null && bean.getPhoneNo().length() > 0) {
+				sql.append(" AND PHONE_NO = " + bean.getPhoneNo());
+			}
+
+		}
+		return sql.toString();
+	}
+
+	@Override
 	public String getTable() {
 
 		return "st_college";
@@ -109,12 +137,6 @@ public class CollegeModel extends BaseModel<CollegeBean> {
 	public CollegeBean getBean() {
 
 		return new CollegeBean();
-	}
-
-	@Override
-	public String getWhereClause(CollegeBean bean) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

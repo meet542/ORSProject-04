@@ -3,6 +3,7 @@ package in.co.rays.proj4.model;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+import in.co.rays.proj4.bean.CollegeBean;
 import in.co.rays.proj4.bean.FacultyBean;
 import in.co.rays.proj4.exception.ApplicationException;
 import in.co.rays.proj4.exception.DuplicateRecordException;
@@ -16,11 +17,15 @@ public class FacultyModel extends BaseModel<FacultyBean> {
 		FacultyBean existBean = findByEmail(bean.getEmail());
 
 		if (existBean != null) {
-			throw new DuplicateRecordException("email already exist");
+			throw new DuplicateRecordException("faculty email already exist");
 		}
 
 		Connection conn = null;
 		long pk = nextPk();
+
+		CollegeModel cModel = new CollegeModel();
+		CollegeBean cBean = cModel.findByPk(bean.getCollegeId());
+		bean.setCollegeName(cBean.getName());
 
 		try {
 
@@ -60,14 +65,17 @@ public class FacultyModel extends BaseModel<FacultyBean> {
 
 	@Override
 	public void update(FacultyBean bean) throws ApplicationException, DuplicateRecordException {
-		
 		FacultyBean existBean = findByEmail(bean.getEmail());
 
-		if (existBean != null) {
-			throw new DuplicateRecordException("email already exist");
+		if (existBean != null && existBean.getId() != bean.getId()) {
+			throw new DuplicateRecordException("faculty email already exist");
 		}
 
 		Connection conn = null;
+
+		CollegeModel cModel = new CollegeModel();
+		CollegeBean cBean = cModel.findByPk(bean.getCollegeId());
+		bean.setCollegeName(cBean.getName());
 
 		try {
 
@@ -110,6 +118,31 @@ public class FacultyModel extends BaseModel<FacultyBean> {
 	}
 
 	@Override
+	public String getWhereClause(FacultyBean bean) {
+
+		StringBuffer sql = new StringBuffer();
+		if (bean != null) {
+			if (bean.getId() > 0) {
+				sql.append(" AND ID = " + bean.getId());
+			}
+			if (bean.getFirstName() != null && bean.getFirstName().length() > 0) {
+				sql.append(" AND FIRST_NAME like '" + bean.getFirstName() + "%'");
+			}
+			if (bean.getLastName() != null && bean.getLastName().length() > 0) {
+				sql.append(" AND LAST_NAME like '" + bean.getLastName() + "%'");
+			}
+			if (bean.getEmail() != null && bean.getEmail().length() > 0) {
+				sql.append(" AND EMAIL like '" + bean.getEmail() + "%'");
+			}
+			if (bean.getCollegeId() > 0) {
+				sql.append(" AND COLLEGE_ID = " + bean.getCollegeId());
+			}
+		}
+		return sql.toString();
+
+	}
+
+	@Override
 	public String getTable() {
 
 		return "st_faculty";
@@ -119,13 +152,6 @@ public class FacultyModel extends BaseModel<FacultyBean> {
 	public FacultyBean getBean() {
 
 		return new FacultyBean();
-
-	}
-
-	@Override
-	public String getWhereClause(FacultyBean bean) {
-
-		return null;
 
 	}
 
